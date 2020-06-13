@@ -1,0 +1,8 @@
+torch==1.5.0
+torchvision==0.6.0
+pickle-mixin==1.0.2
+youtube-dl==2020.6.6
+pandas==1.0.4
+h5py==2.10.0
+joblib==0.15.1
+sklearn==0.0

@@ -287,6 +287,10 @@ def parse_opts():
                         default=-1,
                         type=int,
                         help='number of nodes for distributed training')
+    parser.add_argument('--save_load_data_checkpoint',
+                        default=True,
+                        type=bool,
+                        help='Data loading, for some datasets, could be a slow process. Save and/or load a data loading checkpoint.')
 
     args = parser.parse_args()
 

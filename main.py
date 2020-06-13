@@ -11,6 +11,7 @@ import torch.multiprocessing as mp
 import torch.distributed as dist
 from torch.backends import cudnn
 import torchvision
+import pickle
 
 from opts import parse_opts
 from model import (generate_model, load_pretrained_model, make_data_parallel,
@@ -161,6 +162,9 @@ def get_train_utils(opt, model_parameters):
     elif opt.train_t_crop == 'center':
         temporal_transform.append(TemporalCenterCrop(opt.sample_duration))
     temporal_transform = TemporalCompose(temporal_transform)
+
+    if opt.save_load_data_checkpoint:
+        train_data_checkpoint_path = opt.result_path / Path('train_data_' + opt.dataset + '.data')
 
     train_data = get_training_data(opt.video_path, opt.annotation_path,
                                    opt.dataset, opt.input_type, opt.file_type,
