@@ -309,10 +309,24 @@ def get_inference_utils(opt):
         SlidingWindow(opt.sample_duration, opt.inference_stride))
     temporal_transform = TemporalCompose(temporal_transform)
 
-    inference_data, collate_fn = get_inference_data(
-        opt.video_path, opt.annotation_path, opt.dataset, opt.input_type,
-        opt.file_type, opt.inference_subset, spatial_transform,
-        temporal_transform)
+    inf_data_checkpoint_path = opt.result_path / Path('inf_data_' + opt.dataset + '.data')
+    inf_collate_checkpoint_path = opt.result_path / Path('inf_coll_' + opt.dataset + '.data')
+    if os.path.exists(inf_data_checkpoint_path) and os.path.exists(inf_collate_checkpoint_path):
+        if opt.save_load_data_checkpoint:
+            with open(inf_data_checkpoint_path, 'rb') as filehandle:
+                inference_data = pickle.load(filehandle)
+            with open(inf_collate_checkpoint_path, 'rb') as filehandle:
+                collate_fn = pickle.load(filehandle)
+    else:
+        inference_data, collate_fn = get_inference_data(
+            opt.video_path, opt.annotation_path, opt.dataset, opt.input_type,
+            opt.file_type, opt.inference_subset, spatial_transform,
+            temporal_transform)
+        if opt.save_load_data_checkpoint:
+            with open(inf_data_checkpoint_path, 'wb') as filehandle:
+                pickle.dump(inference_data, filehandle)
+            with open(inf_collate_checkpoint_path, 'wb') as filehandle:
+                pickle.dump(collate_fn, filehandle)
 
     inference_loader = torch.utils.data.DataLoader(
         inference_data,
