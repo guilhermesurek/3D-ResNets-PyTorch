@@ -163,12 +163,19 @@ def get_train_utils(opt, model_parameters):
         temporal_transform.append(TemporalCenterCrop(opt.sample_duration))
     temporal_transform = TemporalCompose(temporal_transform)
 
-    if opt.save_load_data_checkpoint:
-        train_data_checkpoint_path = opt.result_path / Path('train_data_' + opt.dataset + '.data')
+    train_data_checkpoint_path = opt.result_path / Path('train_data_' + opt.dataset + '.data')
+    if os.path.exists(train_data_checkpoint_path):
+        if opt.save_load_data_checkpoint:
+            with open(train_data_checkpoint_path, 'rb') as filehandle:
+                train_data = pickle.load(filehandle)
+    else:
+        train_data = get_training_data(opt.video_path, opt.annotation_path,
+                                    opt.dataset, opt.input_type, opt.file_type,
+                                    spatial_transform, temporal_transform)
+        if opt.save_load_data_checkpoint:
+            with open(train_data_checkpoint_path, 'wb') as filehandle:
+                pickle.dump(train_data, filehandle)
 
-    train_data = get_training_data(opt.video_path, opt.annotation_path,
-                                   opt.dataset, opt.input_type, opt.file_type,
-                                   spatial_transform, temporal_transform)
     if opt.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(
             train_data)
@@ -235,6 +242,26 @@ def get_val_utils(opt):
     temporal_transform.append(
         TemporalEvenCrop(opt.sample_duration, opt.n_val_samples))
     temporal_transform = TemporalCompose(temporal_transform)
+
+    val_data_checkpoint_path = opt.result_path / Path('val_data_' + opt.dataset + '.data')
+    val_collate_checkpoint_path = opt.result_path / Path('val_coll_' + opt.dataset + '.data')
+    if os.path.exists(val_data_checkpoint_path) and os.path.exists(val_collate_checkpoint_path):
+        if opt.save_load_data_checkpoint:
+            with open(val_data_checkpoint_path, 'rb') as filehandle:
+                val_data = pickle.load(filehandle)
+            with open(val_collate_checkpoint_path, 'rb') as filehandle:
+                collate_fn = pickle.load(filehandle)
+    else:
+        val_data, collate_fn = get_validation_data(opt.video_path,
+                                                   opt.annotation_path, opt.dataset,
+                                                   opt.input_type, opt.file_type,
+                                                   spatial_transform,
+                                                   temporal_transform)
+        if opt.save_load_data_checkpoint:
+            with open(val_data_checkpoint_path, 'wb') as filehandle:
+                pickle.dump(val_data, filehandle)
+            with open(val_collate_checkpoint_path, 'wb') as filehandle:
+                pickle.dump(collate_fn, filehandle)
 
     val_data, collate_fn = get_validation_data(opt.video_path,
                                                opt.annotation_path, opt.dataset,
