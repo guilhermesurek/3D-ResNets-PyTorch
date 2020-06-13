@@ -263,11 +263,6 @@ def get_val_utils(opt):
             with open(val_collate_checkpoint_path, 'wb') as filehandle:
                 pickle.dump(collate_fn, filehandle)
 
-    val_data, collate_fn = get_validation_data(opt.video_path,
-                                               opt.annotation_path, opt.dataset,
-                                               opt.input_type, opt.file_type,
-                                               spatial_transform,
-                                               temporal_transform)
     if opt.distributed:
         val_sampler = torch.utils.data.distributed.DistributedSampler(
             val_data, shuffle=False)

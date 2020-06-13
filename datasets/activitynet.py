@@ -63,7 +63,8 @@ class ActivityNet(VideoDataset):
             video_path_formatter=(
                 lambda root_path, label, video_id: root_path / f'v_{video_id}'),
             image_name_formatter=lambda x: f'image_{x:05d}.jpg',
-            is_untrimmed_setting=False):
+            is_untrimmed_setting=False,
+            target_type='label'):
         if is_untrimmed_setting:
             self.data, self.class_names = self.__make_untrimmed_dataset(
                 root_path, annotation_path, subset, video_path_formatter)
@@ -79,6 +80,7 @@ class ActivityNet(VideoDataset):
             self.loader = VideoLoader(image_name_formatter)
         else:
             self.loader = video_loader
+        self.target_type = target_type
 
     def __make_dataset(self, root_path, annotation_path, subset,
                        video_path_formatter):
