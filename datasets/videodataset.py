@@ -127,11 +127,15 @@ class VideoDataset(data.Dataset):
         if self.temporal_transform is not None:
             frame_indices = self.temporal_transform(frame_indices)
 
-        clip = self.__loading(path, frame_indices)
-
         if self.target_transform is not None:
-            target = self.target_transform(target)
+                target = self.target_transform(target)
 
+        if isinstance(frame_indices[0], list):
+            clip = [self.__loading(path, frame_index) for frame_index in frame_indices]
+            target = [target for frame_index in frame_indices]
+        else:
+            clip = self.__loading(path, frame_indices)
+            
         return clip, target
 
     def __len__(self):
