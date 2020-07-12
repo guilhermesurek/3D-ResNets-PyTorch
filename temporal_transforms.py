@@ -1,7 +1,7 @@
 import random
 import math
-
-
+from torchvision.datasets.video_utils import unfold
+from torch import Tensor
 class Compose(object):
 
     def __init__(self, transforms):
@@ -120,6 +120,20 @@ class TemporalEvenCrop(object):
             else:
                 out.append(sample)
 
+        return out
+
+class TemporalSampling(object):
+    
+    def __init__(self, size, step, dilatation, n_samples=1):
+        self.size = size
+        self.step = step
+        self.dilatation = dilatation
+        self.n_samples = n_samples
+
+    def __call__(self, frame_indices):
+        frame_indices = Tensor(frame_indices)
+        out = unfold(frame_indices, self.size, self.step, self.dilatation)
+        out = out[:self.n_samples].int().tolist()
         return out
 
 

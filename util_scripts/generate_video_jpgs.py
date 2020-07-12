@@ -1,11 +1,47 @@
 import subprocess
 import argparse
 from pathlib import Path
+import glob
+import os
+import pandas as pd
 
 from joblib import Parallel, delayed
 
+counter = 0
+
+def list_files_in_dir(dir_path, ext=None, only_filename=False, only_filename_without_ext=False):
+    if ext == None:
+        if not only_filename and not only_filename_without_ext:
+            files_list = glob.glob("%s/*" % dir_path)
+        elif only_filename:
+            files_list = [os.path.basename(x) for x in glob.glob("%s/*" % dir_path)]
+        elif only_filename_without_ext:
+            files_list = [os.path.splitext(os.path.basename(x))[0] for x in glob.glob("%s/*" % dir_path)]
+    else:
+        if not only_filename and not only_filename_without_ext:
+            files_list = glob.glob("%s/*%s" % (dir_path, ext))
+        elif only_filename:
+            files_list = [os.path.basename(x) for x in glob.glob("%s/*%s" % (dir_path, ext))]
+        elif only_filename_without_ext:
+            files_list = [os.path.splitext(os.path.basename(x))[0] for x in glob.glob("%s/*%s" % (dir_path, ext))]
+    return files_list
+
+def get_video_file_paths_not_processed(dir_path, dst_path):
+    video_file_paths_not_processed = []
+    video_file_paths = [[os.path.splitext(os.path.basename(x))[0], x] for x in sorted(dir_path.iterdir())]
+    video_file_paths_processed = [x for x in sorted(list_files_in_dir(dst_path, only_filename_without_ext=True))]
+    if len(video_file_paths_processed) == 0:
+        return [y for [x,y] in video_file_paths]
+    dfA = pd.DataFrame(video_file_paths)
+    dfB = pd.DataFrame(video_file_paths_processed)
+    df = pd.merge(dfA, dfB, on=[0], how="outer", indicator=True
+              ).query('_merge=="left_only"')
+    video_file_paths_not_processed = df[1].to_list()
+    return video_file_paths_not_processed
 
 def video_process(video_file_path, dst_root_path, ext, fps=-1, size=240):
+    counter =+ 1
+    print(f"---Video Counter: {counter} | {video_file_path[0]}") #{os.path.splitext(os.path.basename(video_file_path))[0]}")
     if ext != video_file_path.suffix:
         return
 
@@ -52,7 +88,6 @@ def video_process(video_file_path, dst_root_path, ext, fps=-1, size=240):
     subprocess.run(ffmpeg_cmd)
     print('\n')
 
-
 def class_process(class_dir_path, dst_root_path, ext, fps=-1, size=240):
     if not class_dir_path.is_dir():
         return
@@ -97,6 +132,8 @@ if __name__ == '__main__':
 
     if args.dataset == 'activitynet':
         video_file_paths = [x for x in sorted(args.dir_path.iterdir())]
+        # Get not processed video paths
+        video_file_paths = get_video_file_paths_not_processed(args.dir_path, args.dst_path)
         status_list = Parallel(
             n_jobs=args.n_jobs,
             backend='threading')(delayed(video_process)(
