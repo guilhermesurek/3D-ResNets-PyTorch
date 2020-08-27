@@ -95,7 +95,7 @@ class ActivityNet(VideoDataset):
 
         dataset = []
         for i in range(len(video_ids)):
-            if i % 1000 == 0:
+            if i % 100 == 0:
                 print('dataset loading [{}/{}]'.format(i, len(video_ids)))
 
             video_path = video_path_formatter(root_path, label, video_ids[i])
@@ -111,21 +111,24 @@ class ActivityNet(VideoDataset):
                 t_end = min(t_end, n_video_frames)
                 frame_indices = list(range(t_begin, t_end))
 
-                sample = {
-                    'video': video_path,
-                    'segment': (frame_indices[0], frame_indices[-1] + 1),
-                    'frame_indices': frame_indices,
-                    'fps': fps,
-                    'video_id': video_ids[i]
-                }
-                if annotations is not None:
-                    sample['label'] = class_to_idx[annotation['label']]
-                else:
-                    sample['label'] = -1
+                try:
+                    sample = {
+                        'video': video_path,
+                        'segment': (frame_indices[0], frame_indices[-1] + 1),
+                        'frame_indices': frame_indices,
+                        'fps': fps,
+                        'video_id': video_ids[i]
+                    }
+                    if annotations is not None:
+                        sample['label'] = class_to_idx[annotation['label']]
+                    else:
+                        sample['label'] = -1
 
-                if len(sample['frame_indices']) < 8:
-                    continue
-                dataset.append(sample)
+                    if len(sample['frame_indices']) < 8:
+                        continue
+                    dataset.append(sample)
+                except IndexError:
+                    print(f"IndexError[{i}]: {video_path}")
 
         return dataset, idx_to_class
 
@@ -142,7 +145,7 @@ class ActivityNet(VideoDataset):
 
         dataset = []
         for i in range(len(video_ids)):
-            if i % 1000 == 0:
+            if i % 100 == 0:
                 print('dataset loading [{}/{}]'.format(i, len(video_ids)))
 
             video_path = video_path_formatter(root_path, label, video_ids[i])
@@ -155,13 +158,16 @@ class ActivityNet(VideoDataset):
             t_end = get_n_frames(video_path) + 1
             frame_indices = list(range(t_begin, t_end))
 
-            sample = {
-                'video': video_path,
-                'segment': (frame_indices[0], frame_indices[-1] + 1),
-                'frame_indices': frame_indices,
-                'fps': fps,
-                'video_id': video_ids[i]
-            }
-            dataset.append(sample)
+            try:
+                sample = {
+                    'video': video_path,
+                    'segment': (frame_indices[0], frame_indices[-1] + 1),
+                    'frame_indices': frame_indices,
+                    'fps': fps,
+                    'video_id': video_ids[i]
+                }
+                dataset.append(sample)
+            except IndexError:
+                    print(f"IndexError[{i}]: {video_path}")
 
         return dataset, idx_to_class

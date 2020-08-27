@@ -41,7 +41,7 @@ def get_video_file_paths_not_processed(dir_path, dst_path):
 
 def video_process(video_file_path, dst_root_path, ext, fps=-1, size=240):
     counter =+ 1
-    print(f"---Video Counter: {counter} | {video_file_path[0]}") #{os.path.splitext(os.path.basename(video_file_path))[0]}")
+    print(f"---Video Counter: {counter} | {os.path.splitext(os.path.basename(video_file_path))[0]}")
     if ext != video_file_path.suffix:
         return
 
