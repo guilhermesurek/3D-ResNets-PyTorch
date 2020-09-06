@@ -3,8 +3,8 @@ import pandas as pd
 import timeit
 
 start = timeit.default_timer()
-#dir_path = 'E:/Mestrado/dataset/act200/train_val'
-dir_path = 'D:/Mestrado/Dataset/dst/activitynet200/train_val'
+dir_path = 'E:/Mestrado/dataset/act200/test'
+#dir_path = 'D:/Mestrado/Dataset/dst/activitynet200/test'
 
 if __name__ == "__main__":
     c=0

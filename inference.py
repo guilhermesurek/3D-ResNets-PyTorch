@@ -37,6 +37,7 @@ def inference(data_loader, model, result_path, class_names, no_average,
     with torch.no_grad():
         for i, (inputs, targets) in enumerate(data_loader):
             data_time.update(time.time() - end_time)
+            import ipdb; ipdb.set_trace()
 
             video_ids, segments = zip(*targets)
             outputs = model(inputs)

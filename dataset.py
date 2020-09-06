@@ -181,7 +181,7 @@ def get_inference_data(video_path,
                                      target_transform=target_transform,
                                      video_loader=loader,
                                      video_path_formatter=video_path_formatter,
-                                     is_untrimmed_setting=True)
+                                     is_untrimmed_setting=False) #True)
     else:
         inference_data = VideoDatasetMultiClips(
             video_path,
