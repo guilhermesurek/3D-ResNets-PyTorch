@@ -291,6 +291,9 @@ def parse_opts():
                         default=True,
                         type=bool,
                         help='Data loading, for some datasets, could be a slow process. Save and/or load a data loading checkpoint.')
+    parser.add_argument('--labelsmoothing',
+                        action='store_true',
+                        help='Apply label smoothing as regularization.')
 
     args = parser.parse_args()
 
