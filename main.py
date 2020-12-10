@@ -31,7 +31,7 @@ from utils import Logger, worker_init_fn, get_lr
 from training import train_epoch
 from validation import val_epoch
 import inference
-
+from util_scripts.losses import LabelSmoothingCrossEntropy
 
 def json_serial(obj):
     if isinstance(obj, Path):
@@ -393,7 +393,10 @@ def main_worker(index, opt):
     if opt.is_master_node:
         print(model)
 
-    criterion = CrossEntropyLoss().to(opt.device)
+    if opt.labelsmoothing:
+        criterion = LabelSmoothingCrossEntropy().to(opt.device)
+    else:
+        criterion = CrossEntropyLoss().to(opt.device)
 
     if not opt.no_train:
         (train_loader, train_sampler, train_logger, train_batch_logger,
